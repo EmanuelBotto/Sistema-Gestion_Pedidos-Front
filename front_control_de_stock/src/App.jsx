@@ -85,10 +85,6 @@ export default function App() {
           <span style={{ width: 20, height: 20, display: 'flex' }}>{Icons.logo}</span>
           StockControl
         </div>
-        <div className="topbar-status">
-          <div className="status-dot" />
-          {import.meta.env.VITE_API_URL || 'localhost:3000'}
-        </div>
       </header>
 
       {/* Sidebar */}
