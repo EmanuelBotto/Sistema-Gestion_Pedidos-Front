@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useToast, ToastContainer } from './hooks/useToast';
 import Dashboard from './pages/Dashboard';
 import Productos from './pages/Productos';
 import Movimientos from './pages/Movimientos';
@@ -7,7 +6,6 @@ import Pedidos from './pages/Pedidos';
 import Clientes from './pages/Clientes';
 import Usuarios from './pages/Usuarios';
 
-// SVG icons como componentes
 const Icons = {
   dashboard: (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -60,10 +58,9 @@ const NAV = [
 
 export default function App() {
   const [page, setPage] = useState('dashboard');
-  const { toasts, addToast } = useToast();
 
   const renderPage = () => {
-    const props = { toast: addToast, setPage };
+    const props = { setPage };
     switch (page) {
       case 'dashboard':   return <Dashboard {...props} />;
       case 'productos':   return <Productos {...props} />;
@@ -79,7 +76,6 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* Topbar */}
       <header className="topbar">
         <div className="topbar-logo">
           <span style={{ width: 20, height: 20, display: 'flex' }}>{Icons.logo}</span>
@@ -87,7 +83,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* Sidebar */}
       <nav className="sidebar">
         {sections.map(section => (
           <div key={section}>
@@ -106,13 +101,9 @@ export default function App() {
         ))}
       </nav>
 
-      {/* Content */}
       <main className="main-content">
         {renderPage()}
       </main>
-
-      <ToastContainer toasts={toasts} />
     </div>
   );
 }
-

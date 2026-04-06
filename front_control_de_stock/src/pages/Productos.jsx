@@ -4,7 +4,7 @@ import { Modal, ConfirmModal } from '../components/Modal';
 
 const EMPTY = { nombre: '', descripcion: '', precio: '', estado: 'activo' };
 
-export default function Productos({ toast }) {
+export default function Productos({ }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,22 +37,22 @@ export default function Productos({ toast }) {
   };
 
   const handleSave = async () => {
-    if (!form.nombre.trim()) return toast('El nombre es obligatorio', 'error');
-    if (form.precio === '' || isNaN(form.precio) || Number(form.precio) < 0) return toast('Precio inválido', 'error');
+    if (!form.nombre.trim()) return alert('El nombre es obligatorio', 'error');
+    if (form.precio === '' || isNaN(form.precio) || Number(form.precio) < 0) return alert('Precio inválido', 'error');
     setSaving(true);
     try {
       const payload = { ...form, precio: Number(form.precio) };
       if (editing) {
         await api.productos.update(editing.id, payload);
-        toast('Producto actualizado', 'success');
+        alert('Producto actualizado', 'success');
       } else {
         await api.productos.create(payload);
-        toast('Producto creado', 'success');
+        alert('Producto creado', 'success');
       }
       setModal(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     } finally {
       setSaving(false);
     }
@@ -61,11 +61,11 @@ export default function Productos({ toast }) {
   const handleDelete = async () => {
     try {
       await api.productos.delete(confirmId);
-      toast('Producto eliminado', 'success');
+      alert('Producto eliminado', 'success');
       setConfirmId(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     }
   };
 

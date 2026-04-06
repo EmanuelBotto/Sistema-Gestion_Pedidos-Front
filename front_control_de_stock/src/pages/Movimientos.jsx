@@ -4,7 +4,7 @@ import { Modal, ConfirmModal } from '../components/Modal';
 
 const EMPTY = { producto_id: '', tipo: 'entrada', cantidad: '', usuario_realizo_movimiento: '' };
 
-export default function Movimientos({ toast }) {
+export default function Movimientos({ }) {
   const [items, setItems] = useState([]);
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,18 +34,18 @@ export default function Movimientos({ toast }) {
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
-    if (!form.producto_id) return toast('Seleccioná un producto', 'error');
-    if (!form.cantidad || Number(form.cantidad) <= 0) return toast('Cantidad debe ser mayor a 0', 'error');
-    if (!form.usuario_realizo_movimiento.trim()) return toast('El usuario es obligatorio', 'error');
+    if (!form.producto_id) return alert('Seleccioná un producto', 'error');
+    if (!form.cantidad || Number(form.cantidad) <= 0) return alert('Cantidad debe ser mayor a 0', 'error');
+    if (!form.usuario_realizo_movimiento.trim()) return alert('El usuario es obligatorio', 'error');
     setSaving(true);
     try {
       await api.movimientos.create({ ...form, cantidad: Number(form.cantidad) });
-      toast('Movimiento registrado', 'success');
+      alert('Movimiento registrado', 'success');
       setModal(false);
       setForm(EMPTY);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     } finally {
       setSaving(false);
     }
@@ -54,11 +54,11 @@ export default function Movimientos({ toast }) {
   const handleDelete = async () => {
     try {
       await api.movimientos.delete(confirmId);
-      toast('Movimiento eliminado', 'success');
+      alert('Movimiento eliminado', 'success');
       setConfirmId(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     }
   };
 

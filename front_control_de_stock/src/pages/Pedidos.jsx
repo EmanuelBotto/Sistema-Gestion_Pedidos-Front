@@ -5,7 +5,7 @@ import { Modal, ConfirmModal } from '../components/Modal';
 const EMPTY_CREATE = { cliente_id: '' };
 const ESTADOS = ['pendiente', 'en_proceso', 'completado', 'cancelado'];
 
-export default function Pedidos({ toast }) {
+export default function Pedidos({ }) {
   const [items, setItems] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,30 +39,30 @@ export default function Pedidos({ toast }) {
   const openEdit = (item) => { setForm({ estado: item.estado || 'pendiente' }); setEditing(item); setModal('edit'); };
 
   const handleCreate = async () => {
-    if (!form.cliente_id) return toast('Seleccioná un cliente', 'error');
+    if (!form.cliente_id) return alert('Seleccioná un cliente', 'error');
     setSaving(true);
     try {
       await api.pedidos.create({ cliente_id: form.cliente_id });
-      toast('Pedido creado', 'success');
+      alert('Pedido creado', 'success');
       setModal(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     } finally {
       setSaving(false);
     }
   };
 
   const handleUpdate = async () => {
-    if (!form.estado) return toast('El estado es obligatorio', 'error');
+    if (!form.estado) return alert('El estado es obligatorio', 'error');
     setSaving(true);
     try {
       await api.pedidos.update(editing.id, { estado: form.estado });
-      toast('Estado actualizado', 'success');
+      alert('Estado actualizado', 'success');
       setModal(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     } finally {
       setSaving(false);
     }
@@ -71,11 +71,11 @@ export default function Pedidos({ toast }) {
   const handleDelete = async () => {
     try {
       await api.pedidos.delete(confirmId);
-      toast('Pedido eliminado', 'success');
+      alert('Pedido eliminado', 'success');
       setConfirmId(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     }
   };
 

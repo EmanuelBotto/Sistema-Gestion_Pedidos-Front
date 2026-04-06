@@ -5,7 +5,7 @@ import { Modal, ConfirmModal } from '../components/Modal';
 const ROLES = ['admin', 'operador', 'viewer'];
 const EMPTY = { nombre: '', apellido: '', mail: '', contrasenia: '', rol: 'operador' };
 
-export default function Usuarios({ toast }) {
+export default function Usuarios({ }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -38,25 +38,25 @@ export default function Usuarios({ toast }) {
   };
 
   const handleSave = async () => {
-    if (!form.nombre.trim()) return toast('El nombre es obligatorio', 'error');
-    if (!form.apellido.trim()) return toast('El apellido es obligatorio', 'error');
-    if (!form.mail.trim()) return toast('El mail es obligatorio', 'error');
-    if (!editing && !form.contrasenia.trim()) return toast('La contraseña es obligatoria', 'error');
+    if (!form.nombre.trim()) return alert('El nombre es obligatorio', 'error');
+    if (!form.apellido.trim()) return alert('El apellido es obligatorio', 'error');
+    if (!form.mail.trim()) return alert('El mail es obligatorio', 'error');
+    if (!editing && !form.contrasenia.trim()) return alert('La contraseña es obligatoria', 'error');
     setSaving(true);
     try {
       if (editing) {
         const payload = { ...form };
         if (!payload.contrasenia) delete payload.contrasenia;
         await api.usuarios.update(editing.id, payload);
-        toast('Usuario actualizado', 'success');
+        alert('Usuario actualizado', 'success');
       } else {
         await api.usuarios.create(form);
-        toast('Usuario creado', 'success');
+        alert('Usuario creado', 'success');
       }
       setModal(false);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     } finally {
       setSaving(false);
     }
@@ -65,11 +65,11 @@ export default function Usuarios({ toast }) {
   const handleDelete = async () => {
     try {
       await api.usuarios.delete(confirmId);
-      toast('Usuario eliminado', 'success');
+      alert('Usuario eliminado', 'success');
       setConfirmId(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     }
   };
 

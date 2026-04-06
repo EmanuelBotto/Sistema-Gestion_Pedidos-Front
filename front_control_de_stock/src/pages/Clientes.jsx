@@ -4,7 +4,7 @@ import { Modal, ConfirmModal } from '../components/Modal';
 
 const EMPTY = { nombre: '', mail: '', telefono: '', direccion: '', empresa: '' };
 
-export default function Clientes({ toast }) {
+export default function Clientes({ }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,23 +37,23 @@ export default function Clientes({ toast }) {
   };
 
   const handleSave = async () => {
-    if (!form.nombre.trim()) return toast('El nombre es obligatorio', 'error');
-    if (!form.mail.trim()) return toast('El mail es obligatorio', 'error');
-    if (!form.telefono.trim()) return toast('El teléfono es obligatorio', 'error');
-    if (!form.direccion.trim()) return toast('La dirección es obligatoria', 'error');
+    if (!form.nombre.trim()) return alert('El nombre es obligatorio', 'error');
+    if (!form.mail.trim()) return alert('El mail es obligatorio', 'error');
+    if (!form.telefono.trim()) return alert('El teléfono es obligatorio', 'error');
+    if (!form.direccion.trim()) return alert('La dirección es obligatoria', 'error');
     setSaving(true);
     try {
       if (editing) {
         await api.clientes.update(editing.id, form);
-        toast('Cliente actualizado', 'success');
+        alert('Cliente actualizado', 'success');
       } else {
         await api.clientes.create(form);
-        toast('Cliente creado', 'success');
+        alert('Cliente creado', 'success');
       }
       setModal(false);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     } finally {
       setSaving(false);
     }
@@ -62,11 +62,11 @@ export default function Clientes({ toast }) {
   const handleDelete = async () => {
     try {
       await api.clientes.delete(confirmId);
-      toast('Cliente eliminado', 'success');
+      alert('Cliente eliminado', 'success');
       setConfirmId(null);
       load();
     } catch (e) {
-      toast(e.message, 'error');
+      alert(e.message);
     }
   };
 
