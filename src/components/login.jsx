@@ -22,6 +22,9 @@ function Login() {
         formData
       );
       localStorage.setItem('token', response.data.token);
+      if (response.data.usuario) {
+        localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      }
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
