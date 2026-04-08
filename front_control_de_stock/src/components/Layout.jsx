@@ -6,6 +6,7 @@ const NAV = [
   { id: "movimientos", label: "Movimientos", section: "INVENTARIO" },
   { id: "pedidos", label: "Pedidos", section: "VENTAS" },
   { id: "clientes", label: "Clientes", section: "VENTAS" },
+  { id: "mi-cuenta", label: "Mi cuenta", section: "CLIENTE" },
   { id: "usuarios", label: "Usuarios", section: "SISTEMA" },
 ];
 

@@ -31,6 +31,10 @@ export const api = {
     update: (id, data) => request(`/api/pedidos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => request(`/api/pedidos/${id}`, { method: 'DELETE' }),
   },
+  detallePedido: {
+    getAll: () => request('/api/detalle-pedido'),
+    getById: (id) => request(`/api/detalle-pedido/${id}`),
+  },
   movimientos: {
     getAll: () => request('/api/movimientos-stock'),
     getById: (id) => request(`/api/movimientos-stock/${id}`),

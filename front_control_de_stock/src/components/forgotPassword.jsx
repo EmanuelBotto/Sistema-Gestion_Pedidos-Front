@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../api';
 
 function ForgotPassword() {
   const navigate = useNavigate();
-  const [mail, setEmail] = useState('');
+  const [mail, setMail] = useState('');
   const [msg, setMsg]     = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,13 +15,19 @@ function ForgotPassword() {
     setMsg('');
     setLoading(true);
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/forgot-password`,
-        { gmail: mail }
-      );
+      const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gmail: mail }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Error al enviar el email');
+      }
       setMsg('Te enviamos un email con instrucciones. Revisá tu bandeja.');
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al enviar el email');
+      setError(err.message || 'Error al enviar el email');
     } finally {
       setLoading(false);
     }
@@ -42,8 +48,8 @@ function ForgotPassword() {
               id="email"
               type="email"
               placeholder="correo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={mail}
+              onChange={(e) => setMail(e.target.value)}
               required
               autoComplete="email"
             />

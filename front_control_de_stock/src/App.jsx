@@ -9,6 +9,7 @@ import Movimientos from "./pages/Movimientos";
 import Pedidos from "./pages/Pedidos";
 import Clientes from "./pages/Clientes";
 import Usuarios from "./pages/Usuarios";
+import ClienteVista from "./pages/ClienteVista";
 
 import "./App.css";
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="pedidos" element={<Pedidos />} />
           <Route path="clientes" element={<Clientes />} />
           <Route path="usuarios" element={<Usuarios />} />
+          <Route path="mi-cuenta" element={<ClienteVista />} />
         </Route>
       </Routes>
     </Router>
