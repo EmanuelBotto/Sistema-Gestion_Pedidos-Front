@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../api';
+import { isClientRole } from '../utils/auth';
 
 function Login() {
   const navigate = useNavigate();
@@ -32,7 +33,12 @@ function Login() {
       if (data.token) {
         localStorage.setItem('token', data.token);
       }
-      navigate('/dashboard');
+      if (data.usuario) {
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
+      }
+
+      const destino = isClientRole(data?.usuario?.rol) ? '/catalogo' : '/dashboard';
+      navigate(destino);
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {
