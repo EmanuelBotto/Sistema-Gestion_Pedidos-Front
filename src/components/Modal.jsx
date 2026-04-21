@@ -1,7 +1,7 @@
-export function Modal({ title, onClose, children, footer }) {
+export function Modal({ title, onClose, children, footer, modalClassName = "" }) {
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal">
+      <div className={`modal ${modalClassName}`.trim()}>
         <div className="modal-header">
           <span className="modal-title">{title}</span>
           <button className="btn btn-ghost btn-sm btn-icon" onClick={onClose}>✕</button>

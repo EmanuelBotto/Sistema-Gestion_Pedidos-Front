@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getCurrentUserRole, isAdminRole } from "../utils/auth";
+import { getCurrentUserRole, isAdminRole, isClientRole } from "../utils/auth";
 
 const NAV_ADMIN = [
   { id: "dashboard", label: "Dashboard", section: "GENERAL" },
@@ -18,11 +18,17 @@ const NAV_EMPLEADO = [
   { id: "clientes", label: "Clientes", section: "VENTAS" },
 ];
 
+const NAV_CLIENTE = [
+  { id: "catalogo", label: "Tienda", section: "TIENDA" },
+  { id: "pedidos", label: "Pedidos", section: "CUENTA" },
+  { id: "perfil", label: "Perfil", section: "CUENTA" },
+];
+
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const rol = getCurrentUserRole();
-  const navItems = isAdminRole(rol) ? NAV_ADMIN : NAV_EMPLEADO;
+  const navItems = isAdminRole(rol) ? NAV_ADMIN : isClientRole(rol) ? NAV_CLIENTE : NAV_EMPLEADO;
 
   const currentPage = location.pathname.replace("/", "") || "dashboard";
   const sections = [...new Set(navItems.map((n) => n.section))];

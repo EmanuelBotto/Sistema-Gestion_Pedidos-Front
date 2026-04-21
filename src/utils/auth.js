@@ -14,6 +14,8 @@ const ROLE_ALIASES = {
   administrator: "admin",
   empleado: "empleado",
   operador: "operador",
+  cliente: "cliente",
+  client: "cliente",
   admin: "admin",
   viewer: "viewer",
   visualizador: "viewer",
@@ -48,3 +50,4 @@ export const isEmployeeRole = (rol) => {
 };
 
 export const isAdminRole = (rol) => normalizeRole(rol) === "admin";
+export const isClientRole = (rol) => normalizeRole(rol) === "cliente";

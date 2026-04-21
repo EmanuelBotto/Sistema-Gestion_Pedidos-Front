@@ -2,9 +2,18 @@
 // En desarrollo apunta a http://localhost:3000
 export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const authHeaders = () => {
+  try {
+    const t = localStorage.getItem('token');
+    return t ? { Authorization: `Bearer ${t}` } : {};
+  } catch {
+    return {};
+  }
+};
+
 const request = async (path, options = {}) => {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...authHeaders(), ...options.headers },
     ...options,
   });
   if (!res.ok) {
@@ -15,8 +24,11 @@ const request = async (path, options = {}) => {
   return res.json();
 };
 
-// --- Productos ---
+// --- Auth ---
 export const api = {
+  auth: {
+    me: () => request('/api/auth/me'),
+  },
   productos: {
     getAll: () => request('/api/productos'),
     getById: (id) => request(`/api/productos/${id}`),
@@ -30,6 +42,10 @@ export const api = {
     create: (data) => request('/api/pedidos', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => request(`/api/pedidos/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id) => request(`/api/pedidos/${id}`, { method: 'DELETE' }),
+  },
+  detallePedido: {
+    getAll: () => request('/api/detalle-pedido'),
+    getById: (id) => request(`/api/detalle-pedido/${id}`),
   },
   movimientos: {
     getAll: () => request('/api/movimientos-stock'),

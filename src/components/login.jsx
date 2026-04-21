@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../api';
+import { isClientRole } from '../utils/auth';
 
 function Login() {
   const navigate = useNavigate();
@@ -17,17 +19,14 @@ function Login() {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(
-        `http://localhost:3000/api/auth/login`,
-        formData
-      );
+      const response = await axios.post(`${API_BASE}/api/auth/login`, formData);
       localStorage.setItem('token', response.data.token);
       if (response.data.usuario) {
         localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
       }
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      setError(err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }
