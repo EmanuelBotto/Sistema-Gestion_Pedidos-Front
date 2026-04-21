@@ -767,6 +767,86 @@ body {
   min-width: 0;
 }
 
+/* Cliente - grilla de productos compacta */
+.cv-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cv-product-card {
+  min-width: 0;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.cv-product-thumb {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.cv-product-thumb svg {
+  width: 42px;
+  height: 42px;
+}
+
+.cv-product-body {
+  padding: 8px;
+}
+
+.cv-product-name {
+  margin: 0 0 2px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.cv-product-desc {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  min-height: 1.9em;
+}
+
+.cv-product-price {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.cv-product-actions .btn {
+  width: 100%;
+  height: 30px;
+  font-size: 0.72rem;
+  padding: 0 8px;
+}
+
+@media (max-width: 1400px) {
+  .cv-catalog-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1200px) {
+  .cv-catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 992px) {
+  .cv-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .cv-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .cv-catalog-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Responsive: colapsa sidebar en móvil ────────────────────────────── */
 @media (max-width: 768px) {
   .sidebar {

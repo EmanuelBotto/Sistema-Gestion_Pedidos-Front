@@ -12,10 +12,8 @@ export default function ClienteLayout() {
   const [productos, setProductos] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [search, setSearch] = useState("");
-  const [carrito, setCarrito] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [checkoutDone, setCheckoutDone] = useState(false);
 
   const refreshSession = useCallback(async () => {
     try {
@@ -100,12 +98,8 @@ export default function ClienteLayout() {
         setSelectedProductId,
         search,
         setSearch,
-        carrito,
-        setCarrito,
         loading,
         error,
-        checkoutDone,
-        setCheckoutDone,
       }}
     />
   );
