@@ -10,13 +10,14 @@ import Movimientos from "./pages/Movimientos";
 import Pedidos from "./pages/Pedidos";
 import Clientes from "./pages/Clientes";
 import Usuarios from "./pages/Usuarios";
-import { getCurrentUserRole, isEmployeeRole } from "./utils/auth";
+import { getCurrentUserRole, isAdminRole, isEmployeeRole } from "./utils/auth";
 
 import "./App.css";
 
 function App() {
   const rol = getCurrentUserRole();
   const isEmpleado = isEmployeeRole(rol);
+  const isAdmin = isAdminRole(rol);
 
   return (
     <Router>
@@ -35,7 +36,7 @@ function App() {
           <Route path="clientes" element={<Clientes />} />
           <Route
             path="usuarios"
-            element={isEmpleado ? <Navigate to="/dashboard" replace /> : <Usuarios />}
+            element={isAdmin ? <Usuarios /> : <Navigate to="/dashboard" replace />}
           />
         </Route>
       </Routes>

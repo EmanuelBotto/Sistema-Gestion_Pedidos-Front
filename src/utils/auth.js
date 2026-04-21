@@ -9,6 +9,21 @@ const decodeJwtPayload = (token) => {
   }
 };
 
+const ROLE_ALIASES = {
+  administrador: "admin",
+  administrator: "admin",
+  empleado: "empleado",
+  operador: "operador",
+  admin: "admin",
+  viewer: "viewer",
+  visualizador: "viewer",
+};
+
+export const normalizeRole = (rol) => {
+  const raw = String(rol ?? "").trim().toLowerCase();
+  return ROLE_ALIASES[raw] || raw || null;
+};
+
 export const getStoredUser = () => {
   try {
     const raw = localStorage.getItem("usuario");
@@ -19,12 +34,17 @@ export const getStoredUser = () => {
 };
 
 export const getCurrentUserRole = () => {
-  const fromUser = getStoredUser()?.rol;
+  const fromUser = normalizeRole(getStoredUser()?.rol);
   if (fromUser) return fromUser;
 
   const token = localStorage.getItem("token");
   const payload = decodeJwtPayload(token);
-  return payload?.rol || null;
+  return normalizeRole(payload?.rol);
 };
 
-export const isEmployeeRole = (rol) => rol === "empleado" || rol === "operador";
+export const isEmployeeRole = (rol) => {
+  const role = normalizeRole(rol);
+  return role === "empleado" || role === "operador";
+};
+
+export const isAdminRole = (rol) => normalizeRole(rol) === "admin";

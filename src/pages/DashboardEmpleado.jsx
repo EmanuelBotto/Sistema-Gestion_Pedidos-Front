@@ -3,6 +3,7 @@ import { api } from "../api";
 
 export default function DashboardEmpleado() {
   const [resumen, setResumen] = useState({ pedidos: 0, movimientos: 0, clientes: 0 });
+  const [clientes, setClientes] = useState([]);
   const [ultimosPedidos, setUltimosPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,6 +17,7 @@ export default function DashboardEmpleado() {
       const movimientos = mov?.data ?? mov ?? [];
       const clientes = cli?.data ?? cli ?? [];
 
+      setClientes(clientes);
       setResumen({
         pedidos: pedidos.length,
         movimientos: movimientos.length,
@@ -25,6 +27,11 @@ export default function DashboardEmpleado() {
       setLoading(false);
     });
   }, []);
+
+  const getClienteNombre = (id) => {
+    const cliente = clientes.find((c) => c.id == id);
+    return cliente?.nombre || `Cliente #${id}`;
+  };
 
   if (loading) {
     return (
@@ -79,7 +86,7 @@ export default function DashboardEmpleado() {
                 {ultimosPedidos.map((p) => (
                   <tr key={p.id}>
                     <td>#{p.id}</td>
-                    <td>Cliente #{p.cliente_id}</td>
+                    <td>{getClienteNombre(p.cliente_id)}</td>
                     <td>{p.estado?.replace("_", " ")}</td>
                   </tr>
                 ))}

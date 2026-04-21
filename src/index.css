@@ -99,6 +99,21 @@ body {
   color: rgba(194,205,213,0.7);
 }
 
+.topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-role {
+  color: rgba(246,243,234,0.75);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
 .status-dot {
   width: 7px; height: 7px;
   border-radius: 50%;

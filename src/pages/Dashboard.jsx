@@ -3,6 +3,7 @@ import { api } from '../api';
 
 export default function Dashboard({ setPage }) {
   const [stats, setStats] = useState({ productos: 0, clientes: 0, pedidos: 0, movimientos: 0 });
+  const [clientes, setClientes] = useState([]);
   const [recentMovimientos, setRecentMovimientos] = useState([]);
   const [recentPedidos, setRecentPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,12 +19,18 @@ export default function Dashboard({ setPage }) {
       const c = cli.data ?? cli;
       const pe = ped.data ?? ped;
       const m = mov.data ?? mov;
+      setClientes(c);
       setStats({ productos: p.length, clientes: c.length, pedidos: pe.length, movimientos: m.length });
       setRecentMovimientos(m.slice(-5).reverse());
       setRecentPedidos(pe.slice(-5).reverse());
       setLoading(false);
     });
   }, []);
+
+  const getClienteNombre = (id) => {
+    const cliente = clientes.find((c) => c.id == id);
+    return cliente?.nombre || `Cliente #${id}`;
+  };
 
   if (loading) return <div className="loading"><div className="spinner" /><span>Cargando...</span></div>;
 
@@ -112,7 +119,7 @@ export default function Dashboard({ setPage }) {
                     return (
                       <tr key={p.id}>
                         <td><span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text3)' }}>#{p.id}</span></td>
-                        <td>Cliente #{p.cliente_id}</td>
+                        <td>{getClienteNombre(p.cliente_id)}</td>
                         <td><span className={`badge ${estadoMap[p.estado] || 'badge-gray'}`}>{p.estado?.replace('_',' ')}</span></td>
                       </tr>
                     );
