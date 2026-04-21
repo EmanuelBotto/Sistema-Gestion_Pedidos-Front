@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Modal, ConfirmModal } from '../components/Modal';
 
-const ROLES = ['admin', 'operador', 'viewer'];
-const EMPTY = { nombre: '', apellido: '', mail: '', contrasenia: '', rol: 'operador' };
+const ROLES = ['admin', 'empleado', 'cliente'];
+const EMPTY = { nombre: '', apellido: '', mail: '', contrasenia: '', rol: 'cliente' };
 
 export default function Usuarios({ }) {
   const [items, setItems] = useState([]);
@@ -74,7 +74,7 @@ export default function Usuarios({ }) {
   };
 
   const rolBadge = (rol) => {
-    const map = { admin: 'badge-danger', operador: 'badge-info', viewer: 'badge-gray' };
+    const map = { admin: 'badge-danger', empleado: 'badge-info', cliente: 'badge-gray' };
     return <span className={`badge ${map[rol] || 'badge-gray'}`}>{rol}</span>;
   };
 

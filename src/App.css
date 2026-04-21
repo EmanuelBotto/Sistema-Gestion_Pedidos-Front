@@ -31,6 +31,12 @@
   --shadow-md:    0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05);
 
   --social-bg:    #f4f5f7;
+
+  /* sidebar */
+  --text2:        #6b7280;
+  --text3:        #9ca3af;
+  --accent-muted: rgba(37, 99, 235, 0.1);
+  --hover:        #f0f2f5;
 }
 
 /* modo oscuro automático */
@@ -53,6 +59,12 @@
     --success-border:#16a34a;
 
     --social-bg:    #1a1d23;
+
+    /* sidebar */
+    --text2:        #8892a4;
+    --text3:        #555d6e;
+    --accent-muted: rgba(91, 141, 238, 0.15);
+    --hover:        #1e2435;
   }
 }
 
@@ -408,4 +420,468 @@ body {
   &::before, &::after { content: ''; position: absolute; top: -4.5px; border: 5px solid transparent; }
   &::before { left: 0; border-left-color: var(--border); }
   &::after  { right: 0; border-right-color: var(--border); }
+}
+
+/* ─────────────────────────────────────────
+   Badges de estado
+   ───────────────────────────────────────── */
+   .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 0.5px solid transparent;
+  }
+  
+  .badge-warn {
+    background: #fffbeb;
+    color: #92400e;
+    border-color: #fde68a;
+  }
+  
+  .badge-success {
+    background: var(--success-bg);
+    color: var(--success);
+    border-color: var(--success-border);
+  }
+  
+  .badge-danger {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger-border);
+  }
+  
+  .badge-info {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-color: var(--accent-border);
+  }
+
+  .badge-gray {
+    background: var(--bg);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .badge-warn {
+      background: #2d1d00;
+      color: #fbbf24;
+      border-color: #78350f;
+    }
+  }
+  
+  /* ─────────────────────────────────────────
+     Botón warn (editar) — si no existe ya
+     ───────────────────────────────────────── */
+  .btn-warn {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-warn:hover:not(:disabled) { background: var(--bg); border-color: #9ca3af; }
+  
+  /* ─────────────────────────────────────────
+     Mensajes de estado inline
+     ───────────────────────────────────────── */
+  .error-msg {
+    font-size: 0.8125rem;
+    color: var(--danger);
+    background: var(--danger-bg);
+    border: 0.5px solid var(--danger-border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    margin-bottom: 12px;
+  }
+  
+  /* ─────────────────────────────────────────
+     Layout de página (header + tabla)
+     ───────────────────────────────────────── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-h);
+    margin: 0 0 2px;
+    letter-spacing: -0.4px;
+  }
+  
+  .page-subtitle {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+  
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  
+  .table-wrapper {
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  
+  th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid var(--border);
+    white-space: nowrap;
+  }
+  
+  td {
+    padding: 11px 16px;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  
+  tr:last-child td { border-bottom: none; }
+  
+  tbody tr:hover { background: var(--bg); }
+  
+  .actions-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .empty-state {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  /* ─────────────────────────────────────────
+     Form helpers
+     ───────────────────────────────────────── */
+  .form-grid {
+    display: grid;
+    gap: 12px;
+  }
+  
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  @media (max-width: 500px) {
+    .form-grid-2 { grid-template-columns: 1fr; }
+  }
+  
+  /* ══════════════════════════════════════════════════════════════════════
+   Layout  –  role-aware sidebar shell
+   Agregar/mergear en tu App.css o archivo global de estilos
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Shell */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg, #0f1117);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface, #161b26);
+  border-right: 1px solid var(--border, #2a2f3d);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border, #2a2f3d);
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-logo {
+  color: var(--accent, #5b8dee);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.sidebar-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--text-h, #e6eaf3);
+  letter-spacing: 0.02em;
+}
+
+/* Nav links */
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.5rem 0.75rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text2, #8892a4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.sidebar-link:hover {
+  background: var(--hover, #1e2435);
+  color: var(--text, #c9d1e0);
+}
+
+.sidebar-link--active {
+  background: var(--accent-muted, rgba(91, 141, 238, 0.15));
+  color: var(--accent, #5b8dee);
+}
+
+.sidebar-link--active svg {
+  stroke: var(--accent, #5b8dee);
+}
+
+/* Footer */
+.sidebar-footer {
+  border-top: 1px solid var(--border, #2a2f3d);
+  padding: 0.875rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-user {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-muted, rgba(91, 141, 238, 0.2));
+  color: var(--accent, #5b8dee);
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text, #c9d1e0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-logout {
+  flex-shrink: 0;
+  padding: 0.35rem;
+  color: var(--text3, #555d6e);
+}
+
+.sidebar-logout:hover {
+  color: var(--danger, #e05252);
+}
+
+/* ── Main content ─────────────────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* Cliente - grilla de productos compacta */
+.cv-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cv-product-card {
+  min-width: 0;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.cv-product-thumb {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.cv-product-thumb svg {
+  width: 42px;
+  height: 42px;
+}
+
+.cv-product-body {
+  padding: 8px;
+}
+
+.cv-product-name {
+  margin: 0 0 2px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.cv-product-desc {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  min-height: 1.9em;
+}
+
+.cv-product-price {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.cv-product-actions .btn {
+  width: 100%;
+  height: 30px;
+  font-size: 0.72rem;
+  padding: 0 8px;
+}
+
+@media (max-width: 1400px) {
+  .cv-catalog-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1200px) {
+  .cv-catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 992px) {
+  .cv-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .cv-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+  .cv-catalog-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Responsive: colapsa sidebar en móvil ────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 56px;
+    min-width: 56px;
+  }
+
+  .sidebar-title,
+  .sidebar-user-info,
+  .sidebar-link span {
+    display: none;
+  }
+
+  .sidebar-brand {
+    justify-content: center;
+    padding: 1rem 0.5rem;
+  }
+
+  .sidebar-link {
+    justify-content: center;
+    padding: 0.625rem;
+  }
+
+  .sidebar-footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0.625rem 0.5rem;
+  }
+
+  .sidebar-user {
+    justify-content: center;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
 }

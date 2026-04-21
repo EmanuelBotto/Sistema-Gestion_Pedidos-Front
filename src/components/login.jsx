@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { API_BASE } from '../api';
+import { isClientRole } from '../utils/auth';
 
 function Login() {
   const navigate = useNavigate();
@@ -17,20 +19,10 @@ function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Error al iniciar sesión');
-      }
-
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem('token', data.token);
+      const response = await axios.post(`${API_BASE}/api/auth/login`, formData);
+      localStorage.setItem('token', response.data.token);
+      if (response.data.usuario) {
+        localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
       }
       navigate('/dashboard');
     } catch (err) {
