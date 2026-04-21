@@ -31,6 +31,12 @@
   --shadow-md:    0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.05);
 
   --social-bg:    #f4f5f7;
+
+  /* sidebar */
+  --text2:        #6b7280;
+  --text3:        #9ca3af;
+  --accent-muted: rgba(37, 99, 235, 0.1);
+  --hover:        #f0f2f5;
 }
 
 /* modo oscuro automático */
@@ -53,6 +59,12 @@
     --success-border:#16a34a;
 
     --social-bg:    #1a1d23;
+
+    /* sidebar */
+    --text2:        #8892a4;
+    --text3:        #555d6e;
+    --accent-muted: rgba(91, 141, 238, 0.15);
+    --hover:        #1e2435;
   }
 }
 
@@ -448,6 +460,12 @@ body {
     color: var(--accent);
     border-color: var(--accent-border);
   }
+
+  .badge-gray {
+    background: var(--bg);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
   
   @media (prefers-color-scheme: dark) {
     .badge-warn {
@@ -598,211 +616,192 @@ body {
     .form-grid-2 { grid-template-columns: 1fr; }
   }
   
-  /* ─────────────────────────────────────────
-     ClienteVista — Catálogo
-     ───────────────────────────────────────── */
-  .cv-search-wrap {
-    flex: 1 1 200px;
-    max-width: 280px;
+  /* ══════════════════════════════════════════════════════════════════════
+   Layout  –  role-aware sidebar shell
+   Agregar/mergear en tu App.css o archivo global de estilos
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Shell */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg, #0f1117);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface, #161b26);
+  border-right: 1px solid var(--border, #2a2f3d);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border, #2a2f3d);
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-logo {
+  color: var(--accent, #5b8dee);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.sidebar-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--text-h, #e6eaf3);
+  letter-spacing: 0.02em;
+}
+
+/* Nav links */
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.5rem 0.75rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text2, #8892a4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.sidebar-link:hover {
+  background: var(--hover, #1e2435);
+  color: var(--text, #c9d1e0);
+}
+
+.sidebar-link--active {
+  background: var(--accent-muted, rgba(91, 141, 238, 0.15));
+  color: var(--accent, #5b8dee);
+}
+
+.sidebar-link--active svg {
+  stroke: var(--accent, #5b8dee);
+}
+
+/* Footer */
+.sidebar-footer {
+  border-top: 1px solid var(--border, #2a2f3d);
+  padding: 0.875rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-user {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.sidebar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-muted, rgba(91, 141, 238, 0.2));
+  color: var(--accent, #5b8dee);
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text, #c9d1e0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-logout {
+  flex-shrink: 0;
+  padding: 0.35rem;
+  color: var(--text3, #555d6e);
+}
+
+.sidebar-logout:hover {
+  color: var(--danger, #e05252);
+}
+
+/* ── Main content ─────────────────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+/* ── Responsive: colapsa sidebar en móvil ────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 56px;
+    min-width: 56px;
   }
-  
-  .cv-search {
-    width: 100%;
-    height: 38px;
-    padding: 0 12px;
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--text);
-    font-size: 0.9375rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+
+  .sidebar-title,
+  .sidebar-user-info,
+  .sidebar-link span {
+    display: none;
   }
-  
-  .cv-search::placeholder { color: var(--text-muted); }
-  .cv-search:hover        { border-color: #9ca3af; }
-  .cv-search:focus        { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
-  
-  .cv-cart-btn {
-    position: relative;
-    width: auto;
-    gap: 8px;
-  }
-  
-  .cv-cart-badge {
-    display: inline-flex;
-    align-items: center;
+
+  .sidebar-brand {
     justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    border-radius: 10px;
-    background: var(--accent);
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 700;
-    line-height: 1;
+    padding: 1rem 0.5rem;
   }
-  
-  .cv-catalog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  
-  .cv-product-card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-  
-  .cv-product-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-  }
-  
-  .cv-product-thumb {
-    background: var(--bg);
-    border-bottom: 0.5px solid var(--border);
-    display: flex;
-    align-items: center;
+
+  .sidebar-link {
     justify-content: center;
-    height: 110px;
-    color: var(--text-muted);
+    padding: 0.625rem;
   }
-  
-  .cv-product-thumb svg {
-    width: 48px;
-    height: 48px;
-    opacity: 0.5;
-  }
-  
-  .cv-product-body {
-    padding: 14px;
-    display: flex;
+
+  .sidebar-footer {
     flex-direction: column;
+    align-items: center;
     gap: 6px;
-    flex: 1;
+    padding: 0.625rem 0.5rem;
   }
-  
-  .cv-product-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-h);
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+  .sidebar-user {
+    justify-content: center;
   }
-  
-  .cv-product-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 0;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    flex: 1;
+
+  .main-content {
+    padding: 1rem;
   }
-  
-  .cv-product-price {
-    font-size: 1.0625rem;
-    font-weight: 700;
-    font-family: var(--font-mono, monospace);
-    color: var(--accent);
-    margin: 2px 0 0;
-  }
-  
-  .cv-product-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 6px;
-  }
-  
-  .cv-product-actions .btn { flex: 1; }
-  
-  /* ─────────────────────────────────────────
-     ClienteVista — Carrito / Checkout
-     ───────────────────────────────────────── */
-  .cv-qty-control {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  
-  .cv-qty-value {
-    min-width: 28px;
-    text-align: center;
-    font-size: 0.9375rem;
-    font-weight: 600;
-  }
-  
-  .cv-cart-summary {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-    padding: 1.25rem;
-  }
-  
-  .cv-cart-summary-rows {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 0.5px solid var(--border);
-  }
-  
-  .cv-cart-summary-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-  
-  .cv-cart-summary-total {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-h);
-    padding-top: 8px;
-    border-top: 0.5px solid var(--border);
-  }
-  
-  /* ─────────────────────────────────────────
-     ClienteVista — Historial
-     ───────────────────────────────────────── */
-  .cv-row-expanded td {
-    background: var(--accent-bg);
-  }
-  
-  .cv-expand-btn {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-  }
-  
-  .cv-detail-panel {
-    padding: 12px 20px 16px;
-    border-top: 0.5px solid var(--border);
-  }
-  
-  .cv-detail-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
-    margin: 0 0 10px;
-  }
-  
-  .cv-detail-panel table th,
-  .cv-detail-panel table td {
-    padding: 7px 10px;
-  }
-  
+}

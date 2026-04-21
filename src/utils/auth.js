@@ -1,31 +1,50 @@
-const decodeJwtPayload = (token) => {
-  try {
-    const payload = token?.split(".")?.[1];
-    if (!payload) return null;
-    const json = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(json);
-  } catch {
-    return null;
-  }
+/**
+ * auth.js  –  Helpers de autenticación y roles
+ *
+ * Roles del sistema:
+ *   admin    → acceso total (dashboard, productos, movimientos, pedidos, clientes, usuarios)
+ *   empleado → acceso limitado (dashboard empleado, productos, movimientos, pedidos, clientes)
+ *   cliente  → solo vista cliente (catálogo, carrito, checkout, historial, perfil)
+ */
+
+export const ROLES = {
+  ADMIN:    'admin',
+  EMPLEADO: 'empleado',
+  CLIENTE:  'cliente',
 };
 
+/** Devuelve el token JWT almacenado */
+export const getToken = () => {
+  try { return localStorage.getItem('token'); } catch { return null; }
+};
+
+/** Devuelve el objeto usuario almacenado (parseado) o null */
 export const getStoredUser = () => {
   try {
-    const raw = localStorage.getItem("usuario");
+    const raw = localStorage.getItem('usuario');
     return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 };
 
+/** Devuelve el rol del usuario actual o null si no hay sesión */
 export const getCurrentUserRole = () => {
-  const fromUser = getStoredUser()?.rol;
-  if (fromUser) return fromUser;
-
-  const token = localStorage.getItem("token");
-  const payload = decodeJwtPayload(token);
-  return payload?.rol || null;
+  const user = getStoredUser();
+  return user?.rol ?? null;
 };
 
-export const isEmployeeRole = (rol) => rol === "empleado" || rol === "operador";
-export const isClientRole = (rol) => rol === "cliente";
+/** true si el rol corresponde a cliente */
+export const isClientRole  = (rol) => rol === ROLES.CLIENTE;
+
+/** true si el rol corresponde a empleado */
+export const isEmployeeRole = (rol) => rol === ROLES.EMPLEADO;
+
+/** true si el rol corresponde a admin */
+export const isAdminRole   = (rol) => rol === ROLES.ADMIN;
+
+/** Cierra sesión borrando token y usuario del storage */
+export const logout = () => {
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+  } catch { /* noop */ }
+};
