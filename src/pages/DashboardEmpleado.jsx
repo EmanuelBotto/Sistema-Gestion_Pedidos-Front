@@ -3,6 +3,10 @@ import { api } from "../api";
 
 export default function DashboardEmpleado() {
   const [resumen, setResumen] = useState({ pedidos: 0, movimientos: 0, clientes: 0 });
+<<<<<<< HEAD
+=======
+  const [clientes, setClientes] = useState([]);
+>>>>>>> c768dfc791fa747cfe755a6a0faa503ab3ebc652
   const [ultimosPedidos, setUltimosPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,6 +20,10 @@ export default function DashboardEmpleado() {
       const movimientos = mov?.data ?? mov ?? [];
       const clientes = cli?.data ?? cli ?? [];
 
+<<<<<<< HEAD
+=======
+      setClientes(clientes);
+>>>>>>> c768dfc791fa747cfe755a6a0faa503ab3ebc652
       setResumen({
         pedidos: pedidos.length,
         movimientos: movimientos.length,
@@ -26,6 +34,14 @@ export default function DashboardEmpleado() {
     });
   }, []);
 
+<<<<<<< HEAD
+=======
+  const getClienteNombre = (id) => {
+    const cliente = clientes.find((c) => c.id == id);
+    return cliente?.nombre || `Cliente #${id}`;
+  };
+
+>>>>>>> c768dfc791fa747cfe755a6a0faa503ab3ebc652
   if (loading) {
     return (
       <div className="loading">
@@ -79,7 +95,11 @@ export default function DashboardEmpleado() {
                 {ultimosPedidos.map((p) => (
                   <tr key={p.id}>
                     <td>#{p.id}</td>
+<<<<<<< HEAD
                     <td>Cliente #{p.cliente_id}</td>
+=======
+                    <td>{getClienteNombre(p.cliente_id)}</td>
+>>>>>>> c768dfc791fa747cfe755a6a0faa503ab3ebc652
                     <td>{p.estado?.replace("_", " ")}</td>
                   </tr>
                 ))}

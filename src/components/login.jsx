@@ -18,27 +18,15 @@ function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Error al iniciar sesión');
+      const response = await axios.post(
+        `http://localhost:3000/api/auth/login`,
+        formData
+      );
+      localStorage.setItem('token', response.data.token);
+      if (response.data.usuario) {
+        localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
       }
-
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-      if (data.usuario) {
-        localStorage.setItem('usuario', JSON.stringify(data.usuario));
-      }
-
-      const destino = isClientRole(data?.usuario?.rol) ? '/catalogo' : '/dashboard';
-      navigate(destino);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {
