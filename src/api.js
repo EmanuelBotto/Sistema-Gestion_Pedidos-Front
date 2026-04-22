@@ -46,6 +46,9 @@ export const api = {
   detallePedido: {
     getAll: () => request('/api/detalle-pedido'),
     getById: (id) => request(`/api/detalle-pedido/${id}`),
+    create: (data) => request('/api/detalle-pedido', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => request(`/api/detalle-pedido/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id) => request(`/api/detalle-pedido/${id}`, { method: 'DELETE' }),
   },
   movimientos: {
     getAll: () => request('/api/movimientos-stock'),

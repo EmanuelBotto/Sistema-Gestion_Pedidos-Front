@@ -11,8 +11,10 @@ const SECTION_META = {
 
 const ESTADO_BADGE = {
   pendiente:  { label: "Pendiente",  cls: "badge badge-warn"    },
+  en_proceso: { label: "En proceso", cls: "badge badge-info"    },
   aprobado:   { label: "Aprobado",   cls: "badge badge-success" },
   enviado:    { label: "Enviado",    cls: "badge badge-info"    },
+  completado: { label: "Completado", cls: "badge badge-success" },
   entregado:  { label: "Entregado",  cls: "badge badge-success" },
   cancelado:  { label: "Cancelado",  cls: "badge badge-danger"  },
 };
@@ -38,6 +40,7 @@ export default function ClienteVista() {
     setSearch,
     loading,
     error,
+    refreshTiendaData,
   } = useOutletContext();
 
   const [detailModalId, setDetailModalId]       = useState(null);
@@ -45,6 +48,9 @@ export default function ClienteVista() {
   const [profileForm, setProfileForm]           = useState({ nombre: "", telefono: "", direccion: "", empresa: "" });
   const [savingProfile, setSavingProfile]       = useState(false);
   const [profileMsg, setProfileMsg]             = useState(null); // { type: 'success'|'error', text }
+  const [carrito, setCarrito]                   = useState({});
+  const [savingPedido, setSavingPedido]         = useState(false);
+  const [pedidoMsg, setPedidoMsg]               = useState(null); // { type: 'success'|'error', text }
 
   const meta = SECTION_META[segment] || SECTION_META.catalogo;
 
@@ -101,21 +107,30 @@ export default function ClienteVista() {
   );
 
   const pedidosCliente = useMemo(() => {
-    if (!clienteActual?.id) return [];
-    return pedidos.filter((p) => String(p.cliente_id) === String(clienteActual.id));
-  }, [pedidos, clienteActual]);
+    const clienteIdActual = clienteActual?.id ?? user?.cliente_id ?? user?.cliente?.id ?? null;
+    if (!clienteIdActual) {
+      // Si la API ya filtra por token de cliente, mostramos lo recibido.
+      return pedidos;
+    }
+    return pedidos.filter((p) => {
+      const pedidoClienteId = p?.cliente_id ?? p?.cliente ?? p?.id_cliente ?? null;
+      return String(pedidoClienteId) === String(clienteIdActual);
+    });
+  }, [pedidos, clienteActual, user]);
 
   const historialPedidos = useMemo(() => {
     const mapProductos      = new Map(productos.map((p) => [String(p.id), p.nombre]));
     const detallesPorPedido = new Map();
     detalles.forEach((d) => {
-      const key = String(d.pedido);
+      const pedidoRef = d?.pedido ?? d?.pedido_id ?? d?.id_pedido;
+      const productoRef = d?.producto ?? d?.producto_id ?? d?.id_producto;
+      const key = String(pedidoRef);
       if (!detallesPorPedido.has(key)) detallesPorPedido.set(key, []);
       detallesPorPedido.get(key).push({
         cantidad:       Number(d.cantidad)       || 0,
         precioUnitario: Number(d.precio_unitario) || 0,
         subtotal:      (Number(d.cantidad) || 0) * (Number(d.precio_unitario) || 0),
-        nombreProducto: mapProductos.get(String(d.producto)) || `Producto #${d.producto}`,
+        nombreProducto: mapProductos.get(String(productoRef)) || `Producto #${productoRef ?? "N/D"}`,
       });
     });
     return pedidosCliente
@@ -126,9 +141,80 @@ export default function ClienteVista() {
       .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
   }, [detalles, pedidosCliente, productos]);
 
+  const carritoItems = useMemo(
+    () =>
+      Object.entries(carrito)
+        .map(([productId, cantidad]) => {
+          const producto = productos.find((p) => String(p.id) === String(productId));
+          if (!producto || cantidad <= 0) return null;
+          const precioUnitario = Number(producto.precio) || 0;
+          return {
+            id: producto.id,
+            nombre: producto.nombre || `Producto #${productId}`,
+            cantidad,
+            precioUnitario,
+            subtotal: precioUnitario * cantidad,
+          };
+        })
+        .filter(Boolean),
+    [carrito, productos]
+  );
+
+  const carritoTotal = useMemo(
+    () => carritoItems.reduce((acc, it) => acc + it.subtotal, 0),
+    [carritoItems]
+  );
+
   // ── acciones ─────────────────────────────────────────────────────────────
   const openDetailModal  = (id) => { setSelectedProductId(id); setDetailModalId(id); };
   const closeDetailModal = ()    => setDetailModalId(null);
+  const setCarritoCantidad = (productId, cantidad) => {
+    setCarrito((prev) => {
+      const safeCantidad = Math.max(0, Number(cantidad) || 0);
+      if (safeCantidad === 0) {
+        const { [productId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [productId]: safeCantidad };
+    });
+    setPedidoMsg(null);
+  };
+  const addToCarrito = (productId) => {
+    setCarrito((prev) => ({ ...prev, [productId]: (prev[productId] || 0) + 1 }));
+    setPedidoMsg(null);
+  };
+  const clearCarrito = () => setCarrito({});
+
+  const handleCrearPedido = async () => {
+    if (carritoItems.length === 0 || savingPedido) return;
+    setSavingPedido(true);
+    setPedidoMsg(null);
+    try {
+      const clienteId = clienteActual?.id ?? user?.cliente_id ?? user?.cliente?.id ?? null;
+      const pedidoRes = await api.pedidos.create({ cliente_id: clienteId, estado: "pendiente" });
+      const pedidoCreado = pedidoRes?.data ?? pedidoRes;
+      if (!pedidoCreado?.id) throw new Error("No se pudo crear el pedido");
+
+      await Promise.all(
+        carritoItems.map((it) =>
+          api.detallePedido.create({
+            pedido: pedidoCreado.id,
+            producto: it.id,
+            cantidad: it.cantidad,
+            precio_unitario: it.precioUnitario,
+          })
+        )
+      );
+
+      clearCarrito();
+      await refreshTiendaData?.();
+      setPedidoMsg({ type: "success", text: `Pedido #${pedidoCreado.id} generado correctamente` });
+    } catch (e) {
+      setPedidoMsg({ type: "error", text: e.message || "No se pudo crear el pedido" });
+    } finally {
+      setSavingPedido(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     if (!clienteActual?.id) return;
@@ -186,6 +272,13 @@ export default function ClienteVista() {
       ════════════════════════════════════════ */}
       {segment === "catalogo" && (
         <>
+          {pedidoMsg && (
+            <div className={pedidoMsg.type === "success" ? "success" : "error"} style={{ marginBottom: 12 }}>
+              {pedidoMsg.type === "success" ? "✓ " : ""}
+              {pedidoMsg.text}
+            </div>
+          )}
+
           {productosFiltrados.length === 0 ? (
             <div className="card">
               <div className="empty-state">No hay productos para mostrar.</div>
@@ -209,6 +302,9 @@ export default function ClienteVista() {
                     </p>
                     <p className="cv-product-price">${(Number(p.precio) || 0).toFixed(2)}</p>
                     <div className="cv-product-actions">
+                      <button className="btn btn-outline btn-sm" onClick={() => addToCarrito(p.id)}>
+                        Agregar al carrito
+                      </button>
                       <button className="btn btn-primary btn-sm" onClick={() => openDetailModal(p.id)}>Ver caracteristicas</button>
                     </div>
                   </div>
@@ -216,6 +312,73 @@ export default function ClienteVista() {
               ))}
             </div>
           )}
+
+          <div className="card cv-cart-card">
+            <div className="cv-cart-header">
+              <h2 className="cv-cart-title">Carrito</h2>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={carritoItems.length === 0 || savingPedido}
+                onClick={clearCarrito}
+                style={{ width: "auto" }}
+              >
+                Vaciar
+              </button>
+            </div>
+
+            {carritoItems.length === 0 ? (
+              <div className="empty-state">Todavia no agregaste productos.</div>
+            ) : (
+              <>
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th style={{ textAlign: "center" }}>Cantidad</th>
+                        <th style={{ textAlign: "right" }}>P. unitario</th>
+                        <th style={{ textAlign: "right" }}>Subtotal</th>
+                        <th style={{ width: 48 }} />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {carritoItems.map((it) => (
+                        <tr key={it.id}>
+                          <td>{it.nombre}</td>
+                          <td style={{ textAlign: "center" }}>
+                            <div className="cv-qty-controls">
+                              <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, it.cantidad - 1)}>−</button>
+                              <span>{it.cantidad}</span>
+                              <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, it.cantidad + 1)}>+</button>
+                            </div>
+                          </td>
+                          <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>${it.precioUnitario.toFixed(2)}</td>
+                          <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)", fontWeight: 700 }}>${it.subtotal.toFixed(2)}</td>
+                          <td style={{ textAlign: "right" }}>
+                            <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, 0)} title="Quitar">✕</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="cv-cart-footer">
+                  <p className="cv-cart-total">Total: ${carritoTotal.toFixed(2)}</p>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ width: "auto" }}
+                    disabled={savingPedido || carritoItems.length === 0}
+                    onClick={handleCrearPedido}
+                  >
+                    {savingPedido ? "Generando pedido..." : "Realizar pedido"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* modal detalle producto */}
           {detailModalId != null && (

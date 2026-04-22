@@ -15,6 +15,30 @@ export default function ClienteLayout() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const loadTiendaData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [cliRes, pedRes, detRes, prodRes] = await Promise.all([
+        api.clientes.getAll(),
+        api.pedidos.getAll(),
+        api.detallePedido.getAll(),
+        api.productos.getAll(),
+      ]);
+      const clientesData = cliRes.data ?? cliRes;
+      const productosData = prodRes.data ?? prodRes;
+      setClientes(clientesData);
+      setPedidos(pedRes.data ?? pedRes);
+      setDetalles(detRes.data ?? detRes);
+      setProductos(productosData);
+      setSelectedProductId(productosData[0]?.id ?? null);
+    } catch (e) {
+      setError(e.message || "No se pudo cargar la tienda");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const refreshSession = useCallback(async () => {
     try {
       const data = await api.auth.me();
@@ -44,31 +68,8 @@ export default function ClienteLayout() {
 
   useEffect(() => {
     if (!isClientRole(rol)) return;
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const [cliRes, pedRes, detRes, prodRes] = await Promise.all([
-          api.clientes.getAll(),
-          api.pedidos.getAll(),
-          api.detallePedido.getAll(),
-          api.productos.getAll(),
-        ]);
-        const clientesData = cliRes.data ?? cliRes;
-        const productosData = prodRes.data ?? prodRes;
-        setClientes(clientesData);
-        setPedidos(pedRes.data ?? pedRes);
-        setDetalles(detRes.data ?? detRes);
-        setProductos(productosData);
-        setSelectedProductId(productosData[0]?.id ?? null);
-      } catch (e) {
-        setError(e.message || "No se pudo cargar la tienda");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [rol]);
+    loadTiendaData();
+  }, [rol, loadTiendaData]);
 
   const refreshClientes = async () => {
     try {
@@ -100,6 +101,7 @@ export default function ClienteLayout() {
         setSearch,
         loading,
         error,
+        refreshTiendaData: loadTiendaData,
       }}
     />
   );
