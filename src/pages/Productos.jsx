@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Modal, ConfirmModal } from '../components/Modal';
 
-const EMPTY = { nombre: '', descripcion: '', precio: '', estado: 'activo' };
+const EMPTY = { nombre: '', descripcion: '', precio: '', estado: 'activo', imagen: '' };
 
 export default function Productos({ }) {
   const [items, setItems] = useState([]);
@@ -13,6 +13,20 @@ export default function Productos({ }) {
   const [editing, setEditing] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  const handleImageChange = (file) => {
+    if (!file) {
+      setForm((f) => ({ ...f, imagen: '' }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((f) => ({ ...f, imagen: typeof reader.result === 'string' ? reader.result : '' }));
+    };
+    reader.onerror = () => alert('No se pudo leer la imagen');
+    reader.readAsDataURL(file);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -31,7 +45,13 @@ export default function Productos({ }) {
 
   const openCreate = () => { setForm(EMPTY); setEditing(null); setModal('form'); };
   const openEdit = (item) => {
-    setForm({ nombre: item.nombre, descripcion: item.descripcion || '', precio: item.precio, estado: item.estado || 'activo' });
+    setForm({
+      nombre: item.nombre,
+      descripcion: item.descripcion || '',
+      precio: item.precio,
+      estado: item.estado || 'activo',
+      imagen: item.imagen || '',
+    });
     setEditing(item);
     setModal('form');
   };
@@ -94,6 +114,7 @@ export default function Productos({ }) {
             <table>
               <thead>
                 <tr>
+                  <th>Imagen</th>
                   <th>Nombre</th>
                   <th>Descripción</th>
                   <th>Precio</th>
@@ -103,9 +124,20 @@ export default function Productos({ }) {
               </thead>
               <tbody>
                 {items.length === 0 ? (
-                  <tr><td colSpan={5}><div className="empty-state">Sin productos registrados</div></td></tr>
+                  <tr><td colSpan={6}><div className="empty-state">Sin productos registrados</div></td></tr>
                 ) : items.map(p => (
                   <tr key={p.id}>
+                    <td>
+                      {p.imagen ? (
+                        <img
+                          src={p.imagen}
+                          alt={p.nombre}
+                          style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8 }}
+                        />
+                      ) : (
+                        <span style={{ color: 'var(--text3)' }}>—</span>
+                      )}
+                    </td>
                     <td>{p.nombre}</td>
                     <td>{p.descripcion || <span style={{color:'var(--text3)'}}>—</span>}</td>
                     <td><span style={{color:'var(--accent)', fontFamily:'var(--font-mono)'}}>${Number(p.precio).toFixed(2)}</span></td>
@@ -145,6 +177,23 @@ export default function Productos({ }) {
             <div className="field">
               <label>Descripción</label>
               <textarea value={form.descripcion} onChange={e => setForm(f => ({...f, descripcion: e.target.value}))} placeholder="Descripción opcional" />
+            </div>
+            <div className="field">
+              <label>Imagen (base64)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageChange(e.target.files?.[0])}
+              />
+              {form.imagen && (
+                <div style={{ marginTop: 8 }}>
+                  <img
+                    src={form.imagen}
+                    alt="Vista previa"
+                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                  />
+                </div>
+              )}
             </div>
             <div className="form-grid form-grid-2">
               <div className="field">

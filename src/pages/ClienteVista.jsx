@@ -288,12 +288,20 @@ export default function ClienteVista() {
               {productosFiltrados.map((p) => (
                 <article key={p.id} className="cv-product-card">
                   <div className="cv-product-thumb" aria-hidden>
-                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M8 24h48" stroke="currentColor" strokeWidth="1.5" />
-                      <circle cx="22" cy="38" r="6" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M36 34l16-10v20H36V34z" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
+                    {p.imagen ? (
+                      <img
+                        src={p.imagen}
+                        alt={p.nombre}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+                      />
+                    ) : (
+                      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M8 24h48" stroke="currentColor" strokeWidth="1.5" />
+                        <circle cx="22" cy="38" r="6" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M36 34l16-10v20H36V34z" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                    )}
                   </div>
                   <div className="cv-product-body">
                     <p className="cv-product-name">{p.nombre}</p>
@@ -394,12 +402,20 @@ export default function ClienteVista() {
               {productoModal ? (
                 <div style={{ display: "grid", gap: 12 }}>
                   <div className="cv-product-thumb" aria-hidden style={{ width: "100%", maxWidth: 280, justifySelf: "center" }}>
-                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M8 24h48" stroke="currentColor" strokeWidth="1.5" />
-                      <circle cx="22" cy="38" r="6" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M36 34l16-10v20H36V34z" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1.5" />
-                    </svg>
+                    {productoModal.imagen ? (
+                      <img
+                        src={productoModal.imagen}
+                        alt={productoModal.nombre}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+                      />
+                    ) : (
+                      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M8 24h48" stroke="currentColor" strokeWidth="1.5" />
+                        <circle cx="22" cy="38" r="6" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M36 34l16-10v20H36V34z" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                    )}
                   </div>
                   <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>
                     {productoModal.descripcion?.trim() || "Sin descripción"}
