@@ -53,6 +53,7 @@ export default function ClienteVista() {
   const [pedidoMsg, setPedidoMsg]               = useState(null); // { type: 'success'|'error', text }
 
   const meta = SECTION_META[segment] || SECTION_META.catalogo;
+  const fmtMoney = (value) => `$${(Number(value) || 0).toFixed(2)}`;
 
   // ── cliente vinculado al usuario logueado ────────────────────────────────
   const clienteActual = useMemo(() => {
@@ -165,6 +166,29 @@ export default function ClienteVista() {
     [carritoItems]
   );
 
+  const metricasCliente = useMemo(() => {
+    const totalPedidos = historialPedidos.length;
+    const totalGastado = historialPedidos.reduce((acc, p) => acc + (Number(p.total) || 0), 0);
+    const pendientes = historialPedidos.filter((p) =>
+      ["pendiente", "en_proceso", "aprobado", "enviado"].includes(String(p.estado || "").toLowerCase())
+    ).length;
+    const ultimoPedido = historialPedidos[0] || null;
+    return {
+      totalPedidos,
+      totalGastado,
+      pendientes,
+      ultimoPedidoFecha: ultimoPedido?.fecha ? new Date(ultimoPedido.fecha).toLocaleDateString("es-AR") : "Sin pedidos",
+    };
+  }, [historialPedidos]);
+
+  const pedidosResumen = useMemo(() => {
+    const total = historialPedidos.length;
+    const totalGastado = historialPedidos.reduce((acc, p) => acc + (Number(p.total) || 0), 0);
+    const promedio = total > 0 ? totalGastado / total : 0;
+    const ultimoEstado = total > 0 ? (historialPedidos[0]?.estado || "pendiente") : null;
+    return { total, totalGastado, promedio, ultimoEstado };
+  }, [historialPedidos]);
+
   // ── acciones ─────────────────────────────────────────────────────────────
   const openDetailModal  = (id) => { setSelectedProductId(id); setDetailModalId(id); };
   const closeDetailModal = ()    => setDetailModalId(null);
@@ -272,120 +296,157 @@ export default function ClienteVista() {
       ════════════════════════════════════════ */}
       {segment === "catalogo" && (
         <>
+          <div className="cv-summary-inline">
+            <span><strong>{metricasCliente.totalPedidos}</strong> pedidos</span>
+            <span>·</span>
+            <span><strong>{fmtMoney(metricasCliente.totalGastado)}</strong> comprado</span>
+            <span>·</span>
+            <span><strong>{metricasCliente.pendientes}</strong> en curso</span>
+            <span>·</span>
+            <span>Ultimo: <strong>{metricasCliente.ultimoPedidoFecha}</strong></span>
+          </div>
+
           {pedidoMsg && (
-            <div className={pedidoMsg.type === "success" ? "success" : "error"} style={{ marginBottom: 12 }}>
+            <div className={`cv-inline-alert ${pedidoMsg.type === "success" ? "success" : "error"}`} style={{ marginBottom: 12 }}>
               {pedidoMsg.type === "success" ? "✓ " : ""}
               {pedidoMsg.text}
             </div>
           )}
 
-          {productosFiltrados.length === 0 ? (
-            <div className="card">
-              <div className="empty-state">No hay productos para mostrar.</div>
+          <div className="cv-catalog-layout">
+            <div>
+              {productosFiltrados.length === 0 ? (
+                <div className="card">
+                  <div className="empty-state">No hay productos para mostrar.</div>
+                </div>
+              ) : (
+                <div className="cv-catalog-grid">
+                  {productosFiltrados.map((p) => (
+                    <article
+                      key={p.id}
+                      className="cv-product-card cv-product-card-clickable"
+                      onClick={() => openDetailModal(p.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openDetailModal(p.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Ver detalle de ${p.nombre || "producto"}`}
+                    >
+                      <div className="cv-product-thumb" aria-hidden>
+                        {p.imagen ? (
+                          <img
+                            src={p.imagen}
+                            alt={p.nombre}
+                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+                          />
+                        ) : (
+                          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" strokeWidth="1.5" />
+                            <path d="M8 24h48" stroke="currentColor" strokeWidth="1.5" />
+                            <circle cx="22" cy="38" r="6" stroke="currentColor" strokeWidth="1.5" />
+                            <path d="M36 34l16-10v20H36V34z" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1.5" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="cv-product-body">
+                        <div className="cv-product-head">
+                          <p className="cv-product-name">{p.nombre}</p>
+                          <span className="badge badge-info">Disponible</span>
+                        </div>
+                        <p className="cv-product-desc">
+                          {p.descripcion?.trim() ? p.descripcion : "Sin descripción"}
+                        </p>
+                        <div className="cv-product-meta">
+                          <p className="cv-product-price">{fmtMoney(p.precio)}</p>
+                          <span className="cv-product-stock">
+                            Stock: {Number(p.stock ?? p.cantidad ?? p.stock_actual) || "N/D"}
+                          </span>
+                        </div>
+                        <div className="cv-product-actions">
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToCarrito(p.id);
+                            }}
+                          >
+                            Agregar al carrito
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="cv-catalog-grid">
-              {productosFiltrados.map((p) => (
-                <article key={p.id} className="cv-product-card">
-                  <div className="cv-product-thumb" aria-hidden>
-                    {p.imagen ? (
-                      <img
-                        src={p.imagen}
-                        alt={p.nombre}
-                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
-                      />
-                    ) : (
-                      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="8" y="12" width="48" height="40" rx="6" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M8 24h48" stroke="currentColor" strokeWidth="1.5" />
-                        <circle cx="22" cy="38" r="6" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M36 34l16-10v20H36V34z" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1.5" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="cv-product-body">
-                    <p className="cv-product-name">{p.nombre}</p>
-                    <p className="cv-product-desc">
-                      {p.descripcion?.trim() ? p.descripcion : "Sin descripción"}
-                    </p>
-                    <p className="cv-product-price">${(Number(p.precio) || 0).toFixed(2)}</p>
-                    <div className="cv-product-actions">
-                      <button className="btn btn-outline btn-sm" onClick={() => addToCarrito(p.id)}>
-                        Agregar al carrito
-                      </button>
-                      <button className="btn btn-primary btn-sm" onClick={() => openDetailModal(p.id)}>Ver caracteristicas</button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
 
-          <div className="card cv-cart-card">
-            <div className="cv-cart-header">
-              <h2 className="cv-cart-title">Carrito</h2>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                disabled={carritoItems.length === 0 || savingPedido}
-                onClick={clearCarrito}
-                style={{ width: "auto" }}
-              >
-                Vaciar
-              </button>
-            </div>
-
-            {carritoItems.length === 0 ? (
-              <div className="empty-state">Todavia no agregaste productos.</div>
-            ) : (
-              <>
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Producto</th>
-                        <th style={{ textAlign: "center" }}>Cantidad</th>
-                        <th style={{ textAlign: "right" }}>P. unitario</th>
-                        <th style={{ textAlign: "right" }}>Subtotal</th>
-                        <th style={{ width: 48 }} />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {carritoItems.map((it) => (
-                        <tr key={it.id}>
-                          <td>{it.nombre}</td>
-                          <td style={{ textAlign: "center" }}>
-                            <div className="cv-qty-controls">
-                              <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, it.cantidad - 1)}>−</button>
-                              <span>{it.cantidad}</span>
-                              <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, it.cantidad + 1)}>+</button>
-                            </div>
-                          </td>
-                          <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>${it.precioUnitario.toFixed(2)}</td>
-                          <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)", fontWeight: 700 }}>${it.subtotal.toFixed(2)}</td>
-                          <td style={{ textAlign: "right" }}>
-                            <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, 0)} title="Quitar">✕</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            <aside className="cv-cart-sticky-wrap">
+              <div className="card cv-cart-card">
+                <div className="cv-cart-header">
+                  <h2 className="cv-cart-title">Carrito</h2>
+                  <div className="cv-cart-header-actions">
+                    <span className="badge badge-gray">{carritoItems.length} items</span>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      disabled={carritoItems.length === 0 || savingPedido}
+                      onClick={clearCarrito}
+                      style={{ width: "auto" }}
+                    >
+                      Vaciar
+                    </button>
+                  </div>
                 </div>
 
-                <div className="cv-cart-footer">
-                  <p className="cv-cart-total">Total: ${carritoTotal.toFixed(2)}</p>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    style={{ width: "auto" }}
-                    disabled={savingPedido || carritoItems.length === 0}
-                    onClick={handleCrearPedido}
-                  >
-                    {savingPedido ? "Generando pedido..." : "Realizar pedido"}
-                  </button>
+              {carritoItems.length === 0 ? (
+                <div className="cv-cart-empty">
+                  <p className="cv-cart-empty-title">Tu carrito esta vacio</p>
+                  <p className="cv-cart-empty-text">Agrega productos desde el catalogo para continuar.</p>
                 </div>
-              </>
-            )}
+              ) : (
+                <>
+                  <div className="cv-cart-list">
+                    {carritoItems.map((it) => (
+                      <article key={it.id} className="cv-cart-item">
+                        <div className="cv-cart-item-top">
+                          <p className="cv-cart-item-name">{it.nombre}</p>
+                          <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, 0)} title="Quitar">
+                            ✕
+                          </button>
+                        </div>
+                        <div className="cv-cart-item-meta">
+                          <span>{fmtMoney(it.precioUnitario)} c/u</span>
+                          <span className="cv-cart-item-subtotal">{fmtMoney(it.subtotal)}</span>
+                        </div>
+                        <div className="cv-qty-controls">
+                          <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, it.cantidad - 1)}>−</button>
+                          <span>{it.cantidad}</span>
+                          <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setCarritoCantidad(it.id, it.cantidad + 1)}>+</button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="cv-cart-footer">
+                    <p className="cv-cart-total">Total: {fmtMoney(carritoTotal)}</p>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      style={{ width: "auto" }}
+                      disabled={savingPedido || carritoItems.length === 0}
+                      onClick={handleCrearPedido}
+                    >
+                      {savingPedido ? "Generando pedido..." : "Realizar pedido"}
+                    </button>
+                  </div>
+                </>
+              )}
+              </div>
+            </aside>
           </div>
 
           {/* modal detalle producto */}
@@ -447,85 +508,109 @@ export default function ClienteVista() {
           PEDIDOS
       ════════════════════════════════════════ */}
       {segment === "pedidos" && (
-        <div className="card">
-          {historialPedidos.length === 0 ? (
-            <div className="empty-state">No tenés compras registradas.</div>
-          ) : (
-            <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: 36 }} />
-                    <th>#Pedido</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th style={{ textAlign: "center" }}>Items</th>
-                    <th style={{ textAlign: "right" }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historialPedidos.map((p) => (
-                    <Fragment key={p.id}>
-                      <tr className={expandedPedidoId === p.id ? "cv-row-expanded" : ""}>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm btn-icon cv-expand-btn"
-                            onClick={() => setExpandedPedidoId((id) => (id === p.id ? null : p.id))}
-                            aria-expanded={expandedPedidoId === p.id}
-                          >
-                            {expandedPedidoId === p.id ? "▼" : "▶"}
-                          </button>
-                        </td>
-                        <td style={{ fontWeight: 600 }}>#{p.id}</td>
-                        <td style={{ fontSize: "0.8125rem", fontFamily: "var(--font-mono, monospace)", color: "var(--text-muted)" }}>
-                          {p.fecha ? new Date(p.fecha).toLocaleString("es-AR") : "—"}
-                        </td>
-                        <td><EstadoBadge estado={p.estado} /></td>
-                        <td style={{ textAlign: "center", color: "var(--text-muted)" }}>{p.items.length}</td>
-                        <td style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.875rem", textAlign: "right", fontWeight: 600 }}>
-                          ${p.total.toFixed(2)}
-                        </td>
-                      </tr>
-                      {expandedPedidoId === p.id && (
-                        <tr>
-                          <td colSpan={6} style={{ padding: 0, background: "var(--bg)" }}>
-                            <div className="cv-detail-panel">
-                              <p className="cv-detail-title">Detalle pedido #{p.id}</p>
-                              {p.items.length === 0 ? (
-                                <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>Sin líneas de detalle.</p>
-                              ) : (
-                                <table style={{ width: "100%", fontSize: "0.8125rem" }}>
-                                  <thead>
-                                    <tr>
-                                      <th>Producto</th>
-                                      <th style={{ textAlign: "center" }}>Cant.</th>
-                                      <th style={{ textAlign: "right" }}>P. unit.</th>
-                                      <th style={{ textAlign: "right" }}>Subtotal</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {p.items.map((it, idx) => (
-                                      <tr key={`${p.id}-${idx}`}>
-                                        <td>{it.nombreProducto}</td>
-                                        <td style={{ textAlign: "center" }}>{it.cantidad}</td>
-                                        <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>${it.precioUnitario.toFixed(2)}</td>
-                                        <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>${it.subtotal.toFixed(2)}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              )}
-                            </div>
+        <div className="cv-pedidos-stack">
+          <div className="cv-pedidos-hero">
+            <article className="cv-pedidos-kpi">
+              <span>Pedidos</span>
+              <strong>{pedidosResumen.total}</strong>
+            </article>
+            <article className="cv-pedidos-kpi">
+              <span>Total gastado</span>
+              <strong>{fmtMoney(pedidosResumen.totalGastado)}</strong>
+            </article>
+            <article className="cv-pedidos-kpi">
+              <span>Ticket promedio</span>
+              <strong>{fmtMoney(pedidosResumen.promedio)}</strong>
+            </article>
+            <article className="cv-pedidos-kpi">
+              <span>Ultimo estado</span>
+              <strong>{pedidosResumen.ultimoEstado ? <EstadoBadge estado={pedidosResumen.ultimoEstado} /> : "Sin pedidos"}</strong>
+            </article>
+          </div>
+
+          <div className="card">
+            {historialPedidos.length === 0 ? (
+              <div className="cv-pedidos-empty">
+                <p className="cv-pedidos-empty-title">Todavia no tenes pedidos realizados</p>
+                <p className="cv-pedidos-empty-text">Cuando confirmes tu primera compra, vas a poder seguir su estado desde esta seccion.</p>
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style={{ width: 36 }} />
+                      <th>#Pedido</th>
+                      <th>Fecha</th>
+                      <th>Estado</th>
+                      <th style={{ textAlign: "center" }}>Items</th>
+                      <th style={{ textAlign: "right" }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historialPedidos.map((p) => (
+                      <Fragment key={p.id}>
+                        <tr className={expandedPedidoId === p.id ? "cv-row-expanded" : ""}>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm btn-icon cv-expand-btn"
+                              onClick={() => setExpandedPedidoId((id) => (id === p.id ? null : p.id))}
+                              aria-expanded={expandedPedidoId === p.id}
+                            >
+                              {expandedPedidoId === p.id ? "▼" : "▶"}
+                            </button>
+                          </td>
+                          <td style={{ fontWeight: 600 }}>#{p.id}</td>
+                          <td style={{ fontSize: "0.8125rem", fontFamily: "var(--font-mono, monospace)", color: "var(--text-muted)" }}>
+                            {p.fecha ? new Date(p.fecha).toLocaleString("es-AR") : "—"}
+                          </td>
+                          <td><EstadoBadge estado={p.estado} /></td>
+                          <td style={{ textAlign: "center", color: "var(--text-muted)" }}>{p.items.length}</td>
+                          <td style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.875rem", textAlign: "right", fontWeight: 600 }}>
+                            ${p.total.toFixed(2)}
                           </td>
                         </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                        {expandedPedidoId === p.id && (
+                          <tr>
+                            <td colSpan={6} style={{ padding: 0, background: "var(--bg)" }}>
+                              <div className="cv-detail-panel">
+                                <p className="cv-detail-title">Detalle pedido #{p.id}</p>
+                                {p.items.length === 0 ? (
+                                  <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>Sin lineas de detalle.</p>
+                                ) : (
+                                  <table style={{ width: "100%", fontSize: "0.8125rem" }}>
+                                    <thead>
+                                      <tr>
+                                        <th>Producto</th>
+                                        <th style={{ textAlign: "center" }}>Cant.</th>
+                                        <th style={{ textAlign: "right" }}>P. unit.</th>
+                                        <th style={{ textAlign: "right" }}>Subtotal</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {p.items.map((it, idx) => (
+                                        <tr key={`${p.id}-${idx}`}>
+                                          <td>{it.nombreProducto}</td>
+                                          <td style={{ textAlign: "center" }}>{it.cantidad}</td>
+                                          <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>${it.precioUnitario.toFixed(2)}</td>
+                                          <td style={{ textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>${it.subtotal.toFixed(2)}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -533,27 +618,34 @@ export default function ClienteVista() {
           PERFIL
       ════════════════════════════════════════ */}
       {segment === "perfil" && (
-        <div style={{ display: "grid", gap: 16, maxWidth: 520 }}>
+        <div className="cv-profile-wrap">
           {!clienteActual && (
             <div className="error-msg">
               Tu usuario no tiene un cliente vinculado (<code>cliente_id</code>). Pedile a un administrador que asocie tu cuenta.
             </div>
           )}
 
-          <div className="card" style={{ padding: "1.25rem" }}>
-            <div style={{ marginBottom: 20 }}>
-              <h2 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "var(--text-h)", margin: "0 0 4px" }}>
-                Tus datos
-              </h2>
-              <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)", margin: 0 }}>
-                Podés editar nombre, teléfono, dirección y empresa. El correo no se puede cambiar desde aquí.
-              </p>
+          <div className="card cv-profile-card">
+            <div className="cv-profile-head">
+              <div className="cv-profile-avatar" aria-hidden>
+                {(profileForm.nombre?.trim()?.[0] || user?.mail?.[0] || "C").toUpperCase()}
+              </div>
+              <div>
+                <h2 className="cv-profile-title">Tus datos</h2>
+                <p className="cv-profile-subtitle">
+                  Mantené tu información actualizada para agilizar confirmaciones y entregas.
+                </p>
+              </div>
             </div>
+
+            <p className="cv-profile-note">
+                Podés editar nombre, teléfono, dirección y empresa. El correo no se puede cambiar desde aquí.
+            </p>
 
             <div className="form-grid">
               <div className="field">
                 <label>Correo (solo lectura)</label>
-                <input value={clienteActual?.mail || user?.mail || ""} disabled readOnly />
+                <input className="cv-readonly-input" value={clienteActual?.mail || user?.mail || ""} disabled readOnly />
               </div>
               <div className="form-grid form-grid-2">
                 <div className="field">
@@ -577,15 +669,15 @@ export default function ClienteVista() {
               </div>
 
               {profileMsg && (
-                <div className={profileMsg.type === "success" ? "success" : "error"}>
+                <div className={`cv-inline-alert ${profileMsg.type === "success" ? "success" : "error"}`}>
                   {profileMsg.type === "success" ? "✓ " : ""}{profileMsg.text}
                 </div>
               )}
 
-              <div>
+              <div className="cv-profile-actions">
                 <button
                   type="button"
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-primary"
                   disabled={savingProfile || !clienteActual}
                   onClick={handleSaveProfile}
                   style={{ width: "auto" }}

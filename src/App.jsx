@@ -38,22 +38,27 @@ function App() {
               isCliente ? <Navigate to="/catalogo" replace /> : isEmpleado ? <DashboardEmpleado /> : <Dashboard />
             }
           />
-          <Route path="productos" element={isCliente ? <Navigate to="/catalogo" replace /> : <Productos />} />
-          <Route path="movimientos" element={isCliente ? <Navigate to="/catalogo" replace /> : <Movimientos />} />
-          <Route path="pedidos" element={isCliente ? <Navigate to="/catalogo" replace /> : <Pedidos />} />
-          <Route path="clientes" element={isCliente ? <Navigate to="/catalogo" replace /> : <Clientes />} />
-          <Route
-            path="usuarios"
-            element={isAdmin ? <Usuarios /> : <Navigate to="/dashboard" replace />}
-          />
-          <Route element={<ClienteLayout />}>
-            <Route path="catalogo" element={<ClienteVista />} />
-            <Route path="pedidos" element={<ClienteVista />} />
-            <Route path="perfil" element={<ClienteVista />} />
-            <Route path="historial" element={<Navigate to="/pedidos" replace />} />
-            <Route path="carrito" element={<Navigate to="/catalogo" replace />} />
-            <Route path="checkout" element={<Navigate to="/catalogo" replace />} />
-          </Route>
+          {!isCliente ? (
+            <>
+              <Route path="productos" element={<Productos />} />
+              <Route path="movimientos" element={<Movimientos />} />
+              <Route path="pedidos" element={<Pedidos />} />
+              <Route path="clientes" element={<Clientes />} />
+              <Route
+                path="usuarios"
+                element={isAdmin ? <Usuarios /> : <Navigate to="/dashboard" replace />}
+              />
+            </>
+          ) : (
+            <Route element={<ClienteLayout />}>
+              <Route path="catalogo" element={<ClienteVista />} />
+              <Route path="pedidos" element={<ClienteVista />} />
+              <Route path="perfil" element={<ClienteVista />} />
+              <Route path="historial" element={<Navigate to="/pedidos" replace />} />
+              <Route path="carrito" element={<Navigate to="/catalogo" replace />} />
+              <Route path="checkout" element={<Navigate to="/catalogo" replace />} />
+            </Route>
+          )}
         </Route>
       </Routes>
     </Router>
