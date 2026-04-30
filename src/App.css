@@ -809,7 +809,7 @@ body {
 
 .cv-catalog-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 500px;
   align-items: start;
   gap: 14px;
 }
@@ -821,8 +821,8 @@ body {
 
 .cv-catalog-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .cv-product-card {
@@ -846,7 +846,7 @@ body {
 }
 
 .cv-product-thumb {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
   display: grid;
   place-items: center;
   border-bottom: 0.5px solid var(--border);
@@ -855,15 +855,15 @@ body {
 }
 
 .cv-product-thumb svg {
-  width: 42px;
-  height: 42px;
+  width: 28px;
+  height: 28px;
 }
 
 .cv-product-body {
-  min-height: 154px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  padding: 6px 7px;
   background: #ffffff;
   color: #111317;
 }
@@ -1187,18 +1187,18 @@ body {
 }
 
 @media (max-width: 1400px) {
-  .cv-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cv-catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 1200px) {
-  .cv-catalog-layout { grid-template-columns: minmax(0, 1fr) 300px; }
-  .cv-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cv-catalog-layout { grid-template-columns: minmax(0, 1fr) 340px; }
+  .cv-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 992px) {
   .cv-catalog-layout { grid-template-columns: 1fr; }
   .cv-cart-sticky-wrap { position: static; }
-  .cv-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cv-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cv-pedidos-hero { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -1208,7 +1208,7 @@ body {
 }
 
 @media (max-width: 480px) {
-  .cv-catalog-grid { grid-template-columns: 1fr; }
+  .cv-catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ── Responsive: colapsa sidebar en móvil ────────────────────────────── */

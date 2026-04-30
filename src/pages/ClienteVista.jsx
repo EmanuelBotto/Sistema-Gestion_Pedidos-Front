@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useOutletContext, useLocation } from "react-router-dom";
-import { Modal } from "../components/Modal";
+import { Modal, ConfirmModal } from "../components/Modal";
 import { api } from "../api";
 
 const SECTION_META = {
@@ -51,6 +51,8 @@ export default function ClienteVista() {
   const [carrito, setCarrito]                   = useState({});
   const [savingPedido, setSavingPedido]         = useState(false);
   const [pedidoMsg, setPedidoMsg]               = useState(null); // { type: 'success'|'error', text }
+  const [confirmDeletePedidoId, setConfirmDeletePedidoId] = useState(null);
+  const [deletingPedido, setDeletingPedido]     = useState(false);
 
   const meta = SECTION_META[segment] || SECTION_META.catalogo;
   const fmtMoney = (value) => `$${(Number(value) || 0).toFixed(2)}`;
@@ -240,6 +242,26 @@ export default function ClienteVista() {
     }
   };
 
+  const handleDeletePedido = async () => {
+    if (!confirmDeletePedidoId || deletingPedido) return;
+    setDeletingPedido(true);
+    try {
+      // Eliminar los detalles del pedido primero
+      const detallesToDelete = detalles.filter((d) => {
+        const pedidoRef = d?.pedido ?? d?.pedido_id ?? d?.id_pedido;
+        return String(pedidoRef) === String(confirmDeletePedidoId);
+      });
+      await Promise.all(detallesToDelete.map((d) => api.detallePedido.delete(d.id)));
+      await api.pedidos.delete(confirmDeletePedidoId);
+      setConfirmDeletePedidoId(null);
+      await refreshTiendaData?.();
+    } catch (e) {
+      alert(e.message || "No se pudo eliminar el pedido");
+    } finally {
+      setDeletingPedido(false);
+    }
+  };
+
   const handleSaveProfile = async () => {
     if (!clienteActual?.id) return;
     if (!profileForm.nombre.trim())    { setProfileMsg({ type: "error", text: "El nombre es obligatorio" }); return; }
@@ -341,7 +363,7 @@ export default function ClienteVista() {
                           <img
                             src={p.imagen}
                             alt={p.nombre}
-                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }}
+                            style={{ width: "80%", height: "80%", objectFit: "cover", borderRadius: "inherit" }}
                           />
                         ) : (
                           <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -545,6 +567,7 @@ export default function ClienteVista() {
                       <th>Estado</th>
                       <th style={{ textAlign: "center" }}>Items</th>
                       <th style={{ textAlign: "right" }}>Total</th>
+                      <th style={{ width: 60 }} />
                     </tr>
                   </thead>
                   <tbody>
@@ -570,10 +593,22 @@ export default function ClienteVista() {
                           <td style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "0.875rem", textAlign: "right", fontWeight: 600 }}>
                             ${p.total.toFixed(2)}
                           </td>
+                          <td style={{ textAlign: "center" }}>
+                            {["pendiente", "cancelado"].includes(String(p.estado || "").toLowerCase()) && (
+                              <button
+                                type="button"
+                                className="btn btn-danger btn-sm"
+                                title="Eliminar pedido"
+                                onClick={() => setConfirmDeletePedidoId(p.id)}
+                              >
+                                Eliminar
+                              </button>
+                            )}
+                          </td>
                         </tr>
                         {expandedPedidoId === p.id && (
                           <tr>
-                            <td colSpan={6} style={{ padding: 0, background: "var(--bg)" }}>
+                            <td colSpan={7} style={{ padding: 0, background: "var(--bg)" }}>
                               <div className="cv-detail-panel">
                                 <p className="cv-detail-title">Detalle pedido #{p.id}</p>
                                 {p.items.length === 0 ? (
@@ -660,7 +695,7 @@ export default function ClienteVista() {
               <div className="form-grid form-grid-2">
                 <div className="field">
                   <label>Teléfono *</label>
-                  <input value={profileForm.telefono} onChange={pf("telefono")} placeholder="+54 11 0000-0000" disabled={!clienteActual} />
+                  <input type="number" step="1" value={profileForm.telefono} onChange={pf("telefono")} placeholder="+54 11 0000-0000" disabled={!clienteActual} />
                 </div>
                 <div className="field">
                   <label>Dirección *</label>
@@ -688,6 +723,19 @@ export default function ClienteVista() {
             </div>
           </div>
         </div>
+      )}
+      {confirmDeletePedidoId && (
+        <ConfirmModal
+          message={
+            <>
+              ¿Eliminás el pedido <strong>#{confirmDeletePedidoId}</strong>? Se borrarán también sus líneas de detalle. Esta acción no se puede deshacer.
+            </>
+          }
+          onConfirm={handleDeletePedido}
+          onClose={() => setConfirmDeletePedidoId(null)}
+          confirmLabel={deletingPedido ? "Eliminando..." : "Eliminar pedido"}
+          disabled={deletingPedido}
+        />
       )}
     </div>
   );
